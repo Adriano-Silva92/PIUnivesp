@@ -4,7 +4,9 @@ Projeto desenvolvido com Django para gerenciamento de pedidos, com interface mod
 
 ## 📌 Descrição
 
-O **PIUnivesp** é um sistema web para registrar, visualizar e controlar pedidos, voltado para uso interno em organizações. Permite aos usuários autenticados solicitarem produtos, acompanhar o status dos pedidos e visualizar mensagens em tempo real.
+O projeto trata se de um sistema web para registrar, visualizar e controlar pedidos, voltado para uso interno em organizações. Permite aos usuários autenticados solicitarem produtos, acompanhar o status dos pedidos, visualizar mensagens em tempo real e ainda conta com uma API para envios de e-mails automáticos. Também possui suporte ao Cloudnary com 25GB de armazenamento de imagens na nuvem. 
+
+Link acesso: https://technikpi.fly.dev/ (Acesso por tempo limitado)
 
 ## 🚀 Funcionalidades
 
@@ -20,7 +22,11 @@ O **PIUnivesp** é um sistema web para registrar, visualizar e controlar pedidos
 
 ## 📷 Imagens do sistema
 
-> (Adicione prints aqui se quiser!)
+[Pedidos](https://github.com/user-attachments/assets/414c143b-a92d-4dc4-866a-6eaf924c5e74)
+[NovoPedido](https://github.com/user-attachments/assets/c310b57e-3e66-4746-a75c-e3eb187f99f0)
+[PedidoAprovado ](https://github.com/user-attachments/assets/2419a58d-7c2a-470f-8304-18e5e1aa1ac2)
+[VisaoSuperUser](https://github.com/user-attachments/assets/27bf42e6-edd1-4501-be75-2a102cf8ae93)
+
 
 ## 🧰 Tecnologias utilizadas
 
