@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.sqlite3
+*.log
+*.pot
+*.pyc
+
+# Virtualenvs
+env/
+venv/
+ENV/
+
+# VSCode / PyCharm
+.vscode/
+.idea/
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos Django
+*.log
+*.pot
+*.pyc
+
+# Arquivos de ambiente
+.env
+
+# Pasta de arquivos estáticos e mídia gerados
+staticfiles/
+media/
+static/
+
+# Arquivos e ferramentas locais
+flyctl.exe
+wintun.dll
+*.swp

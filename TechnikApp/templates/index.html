@@ -1,0 +1,317 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de Compras</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body class="light-theme">
+    <div class="container-fluid my-4">
+        <!-- TOPO -->
+        <div class="container-fluid bg-light py-3 d-flex justify-content-between align-items-center border-bottom">
+            <div>
+                <button id="toggle-dark" class="btn btn-outline-light mb-3">
+                    <img src="{% static 'img/modo_escuro.png' %}" alt="Modo" height="15">
+                </button>
+                <img src="{% static 'img/logotechnik.png' %}" alt="Logo" height="50">
+                <strong>SISTEMA DE COMPRAS</strong>
+            </div>
+            <div id="usuarios-logados">
+                {% include 'partials/usuarios_logados.html' %}
+            </div>
+            <div class="text-right">
+                <img src="{{ user.profile.foto_url }}" class="rounded-circle user-thumb" alt="Usuário" height="40">
+                <span class="navbar-text mr-3">Olá, <strong>{{ user.first_name|default:user.username }}</strong>!</span>
+                <form action="{% url 'logout' %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Sair</button>
+                </form>
+            </div>
+        </div>
+        <!-- teste exportar CSV PDF -->
+        <div class="text-right mb-3">
+               <a href="{% url 'exportar_csv' %}" class="btn btn-outline-success">📄 Exportar CSV</a>
+               <a href="{% url 'exportar_pdf' %}" class="btn btn-outline-danger">📄 Exportar PDF</a>
+        </div>
+        <!-- fim teste CSV PDF -->
+
+        <!-- TABELA -->
+        <div class="container-fluid my-4">
+            <h5>Exibindo a lista de pedidos:</h5>
+            <input type="text" class="form-control mb-2" id="filtro" placeholder="Filtrar por nome, data, setor...">
+            <div class="table-responsive" style="max-height: 600px; overflow-y: scroll;">
+                <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Nome</th>
+                            <th>Setor</th>
+                            <th>Produto</th>
+                            <th>Quantidade</th>
+                            <th>Prioridade</th>
+                            <th>Status</th>
+                            <th>Data</th>
+                            {% if user.is_superuser %}<th>Ações</th>{% endif %}
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-dados">
+                        {% for pedido in pedidos %}
+                        <tr>
+                            <td>{{ pedido.usuario.first_name }}</td>
+                            <td>{{ pedido.setor }}</td>
+                            <td>
+                                <a href="#"
+                                   class="abrir-modal-pedido produto-link"
+                                   data-id="{{ pedido.id }}"
+                                   data-produto="{{ pedido.produto }}">
+                                   {{ pedido.produto|slice:":20" }}{% if pedido.produto|length > 20 %}...{% endif %}
+                                </a>
+                            </td>
+                            <td>{{ pedido.quantidade }}</td>
+                            <td>{{ pedido.prioridade }}</td>
+                            <td>
+                                {% if pedido.status == "Aprovado" %}
+                                <span class="badge badge-success">APROVADO</span>
+                                {% elif pedido.status == "Pendente" %}
+                                <span class="badge badge-warning text-dark">PENDENTE</span>
+                                {% elif pedido.status == "Negado" %}
+                                <span class="badge badge-danger">NEGADO</span>
+                                {% else %}
+                                <span class="badge badge-secondary">{{ pedido.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ pedido.data }}</td>
+                            {% if user.is_superuser %}
+                            <td>
+                                {% if pedido.status == "Pendente" %}
+                                <form method="post" action="{% url 'aprovar_pedido' pedido.id %}" style="display: inline-block;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-success">Aprovar</button>
+                                </form>
+                                <form method="post" action="{% url 'negar_pedido' pedido.id %}" style="display: inline-block;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger">Negar</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#modalNovoPedido">
+                Novo Pedido
+            </button>
+
+            <!-- Modal Novo Pedido -->
+            <div class="modal fade" id="modalNovoPedido" tabindex="-1" role="dialog" aria-labelledby="modalNovoPedidoLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <form method="post" action="{% url 'criar_pedido' %}">
+                        {% csrf_token %}
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modalNovoPedidoLabel">Novo Pedido</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="produto">Produto</label>
+                                    <input type="text" class="form-control" id="produto" name="produto" maxlength="100" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="quantidade">Quantidade</label>
+                                    <input type="number" class="form-control" id="quantidade" name="quantidade" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="setor">Setor</label>
+                                    <input type="text" class="form-control" id="setor" name="setor" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="prioridade">Grau de Prioridade</label>
+                                    <select class="form-control" id="prioridade" name="prioridade" required>
+                                        <option value="Baixa">Baixa</option>
+                                        <option value="Média">Média</option>
+                                        <option value="Alta">Alta</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Salvar Pedido</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Detalhes do Pedido -->
+        <div class="modal fade" id="modalDetalhesPedido" tabindex="-1" role="dialog" aria-labelledby="detalhesPedidoLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+               <div class="modal-content">
+                   <div class="modal-header">
+                      <h5 class="modal-title" id="detalhesPedidoLabel">Detalhes do Pedido</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                   </div>
+                   <div class="modal-body">
+                       <p><strong>ID:</strong> <span id="detalhe-id"></span></p>
+                       <p><strong>Produto:</strong> <span id="detalhe-produto"></span></p>
+                   </div>
+                    <div class="modal-footer">
+                         <button type="button" class="btn btn-primary" data-dismiss="modal">Fechar</button>
+                    </div>
+               </div>
+            </div>
+        </div>
+         <!-- Fim modal detalhes do Pedido -->
+
+        <!-- MENSAGENS ESTILO CHAT -->
+        <div class="container my-4">
+            <h5>Mensagens</h5>
+            <div class="mensagens-container bg-light p-3 rounded">
+                {% for mensagem in mensagens %}
+                <div class="d-flex {% if mensagem.usuario == user %}justify-content-end{% else %}justify-content-start{% endif %} mb-3">
+                    {% if mensagem.usuario != user %}
+                    <img src="{{ mensagem.foto_url }}" class="rounded-circle mr-2 user-thumb"
+                         alt="Foto de {{ mensagem.usuario.first_name|default:mensagem.usuario.username }}"
+                         title="{{ mensagem.usuario.get_full_name|default:mensagem.usuario.username }}"
+                    >
+
+                    {% endif %}
+                    <div class="p-2 rounded {% if mensagem.usuario == user %}bg-primary text-white{% else %}bg-secondary text-white{% endif %}" style="max-width: 60%;">
+                        <div>{{ mensagem.texto }}</div>
+                        <small class="mensagem-data">{{ mensagem.data_criacao|date:"d/m/Y H:i" }}</small>
+                    </div>
+                    {% if mensagem.usuario == user %}
+                    <form method="post" action="{% url 'apagar_mensagem' mensagem.id %}" class="ml-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-link text-danger p-0" title="Apagar mensagem">&#128465;</button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- GRÁFICO E FORMULÁRIO -->
+        <div class="container d-flex justify-content-between mt-5">
+            <div class="w-50">
+                <h6>Gráfico de Pedidos</h6>
+                <canvas id="graficoPedidos"></canvas>
+            </div>
+            <div class="w-50 pl-4">
+                <h6>Enviar mensagem:</h6>
+                <form method="post" id="form-enviar-mensagem">
+                    {% csrf_token %}
+                    <textarea class="form-control mb-2" name="mensagem" id="mensagem-texto" rows="4" placeholder="Digite sua mensagem..."></textarea>
+                    <button type="submit" class="btn btn-primary" id="btn-enviar">Enviar</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- JS -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            var countAprovado = {{ count_aprovado|default:0 }};
+            var countNegado = {{ count_negado|default:0 }};
+            var countPendente = {{ count_pendente|default:0 }};
+
+            var ctx = document.getElementById('graficoPedidos').getContext('2d');
+            var grafico = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Aprovado', 'Negado', 'Pendente'],
+                    datasets: [{
+                        label: 'Pedidos por Status',
+                        data: [countAprovado, countNegado, countPendente],
+                        backgroundColor: ['green', 'red', 'orange']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    legend: { display: true },
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                stepSize: 1
+                            }
+                        }]
+                    }
+                }
+            });
+        </script>
+
+        <!-- teste de script alert status aprovado/negado
+         Após funcionamento, alterar para um arquivo js e colocar antes do /body
+         juntamente com os outros -->
+
+        {% if novos_pedidos_aprovados_ou_negados %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% for pedido in novos_pedidos_aprovados_ou_negados %}
+            Swal.fire({
+                title: 'Pedido {{ pedido.status }}!',
+                text: "Seu pedido '{{ pedido.produto }}' foi {{ pedido.status }}.",
+                {% if pedido.status == "Aprovado" %}
+                icon: 'success',
+                {% else %}
+                icon: 'error',
+                {% endif %}
+                confirmButtonText: 'OK',
+                backdrop: true,
+                position: 'center',  // centraliza
+                didOpen: () => {
+                    const audio = new Audio("/static/sounds/notification.mp3");
+                    audio.play();
+                }
+            });
+        {% endfor %}
+    });
+</script>
+{% endif %}
+
+        <!-- fim teste -->
+
+<!-- Script abrir modal Detalhes -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const links = document.querySelectorAll('.abrir-modal-pedido');
+    links.forEach(link => {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.getElementById('detalhe-id').textContent = this.dataset.id;
+        document.getElementById('detalhe-produto').textContent = this.dataset.produto;
+        $('#modalDetalhesPedido').modal('show');
+      });
+    });
+  });
+</script>
+<!-- Fim script modal Detalher -->
+
+
+
+        <script src="{% static 'js/sound_chat.js' %}"></script>
+         <script src="{% static 'js/mensagens_status_all.js' %}"></script>
+        <script src="{% static 'js/mensagen_status.js' %}"></script>
+        <audio id="alert-sound" src="{% static 'sounds/notification.mp3' %}" preload="auto"></audio>
+        <audio id="sendSound" src="{% static 'sounds/notification2.mp3' %}" preload="auto"></audio>
+        <script src="{% static 'js/filtro-tabela.js' %}"></script>
+        <script src="{% static 'js/script.js' %}"></script>
+        <script src="{% static 'js/usuarios_logados.js' %}"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    </div>
+</body>
+</html>

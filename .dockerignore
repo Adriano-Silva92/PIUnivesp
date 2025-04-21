@@ -1,0 +1,23 @@
+# Ignora o ambiente virtual
+venv/
+.env
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+*.sqlite3
+*.log
+*.db
+
+# Ignora arquivos de controle de versão
+.git/
+.gitignore
+
+# Ignora arquivos de IDE
+*.idea/
+*.vscode/
+
+# Outros arquivos que não precisam ir para o container
+flyctl.exe
+wintun.dll
+*.swp

@@ -1,0 +1,7 @@
+{% load static %}
+{% for u in usuarios_logados %}
+    <div class="user-thumb-wrapper mr-1" title="{{ u.user.get_full_name|default:u.user.username }}">
+        <img src="{{ u.foto_url }}" class="rounded-circle user-thumb" alt="{{ u.user.get_full_name|default:u.user.username }}" height="40">
+        <span class="user-online-indicator"></span>
+    </div>
+{% endfor %}

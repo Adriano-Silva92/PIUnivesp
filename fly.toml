@@ -1,0 +1,23 @@
+# fly.toml app configuration file generated for juu73 on 2025-04-16T20:12:14-03:00
+
+app = 'technikpi'
+primary_region = 'gru'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[processes]
+  app = "gunicorn Technik3.wsgi --bind 0.0.0.0:8080"
+
+[env]
+DJANGO_ENV = "prod"

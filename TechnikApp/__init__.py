@@ -1,0 +1,1 @@
+default_app_config = 'TechnikApp.apps.CoreConfig' #Essa opção garante que quero usar minhas configurações
