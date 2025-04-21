@@ -22,10 +22,10 @@ Link acesso: https://technikpi.fly.dev/ (Acesso por tempo limitado)
 
 ## 📷 Imagens do sistema
 
-[Pedidos](https://github.com/user-attachments/assets/414c143b-a92d-4dc4-866a-6eaf924c5e74)
-[NovoPedido](https://github.com/user-attachments/assets/c310b57e-3e66-4746-a75c-e3eb187f99f0)
-[PedidoAprovado ](https://github.com/user-attachments/assets/2419a58d-7c2a-470f-8304-18e5e1aa1ac2)
-[VisaoSuperUser](https://github.com/user-attachments/assets/27bf42e6-edd1-4501-be75-2a102cf8ae93)
+![Pedidos](https://github.com/user-attachments/assets/414c143b-a92d-4dc4-866a-6eaf924c5e74); 
+![NovoPedido](https://github.com/user-attachments/assets/c310b57e-3e66-4746-a75c-e3eb187f99f0);
+![PedidoAprovado ](https://github.com/user-attachments/assets/2419a58d-7c2a-470f-8304-18e5e1aa1ac2);
+![VisaoSuperUser](https://github.com/user-attachments/assets/27bf42e6-edd1-4501-be75-2a102cf8ae93);
 
 
 ## 🧰 Tecnologias utilizadas
