@@ -1,5 +1,7 @@
+#Base.py substituiu o settings.py (Base.py carrega os dados para dev ou prod)
 from pathlib import Path
 from decouple import config, Csv
+import os
 
 # Caminho base do projeto
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -26,6 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'TechnikApp',
+    'pwa',
 ]
 
 # Middleware
@@ -63,9 +66,9 @@ TEMPLATES = [
 ]
 
 # Arquivos estáticos (CSS, JS, IMG)
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / "staticfiles"
+#STATIC_URL = '/static/'
+#STATICFILES_DIRS = [BASE_DIR / "static"]
+#STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Redirecionamento de login/logout
 LOGIN_REDIRECT_URL = '/'
@@ -80,7 +83,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True  #Ao fechar navegador encerra sessão
 # Chave primária padrão
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# E-mail
+# Configurações para disparo de E-mail
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -99,3 +102,41 @@ AUTH_PASSWORD_VALIDATORS = [
 
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
+
+#Progressive Web App
+PWA_APP_NAME = 'Sistema de Pedidos'
+PWA_APP_DESCRIPTION = "Sistema Web para gerenciamento de pedidos"
+PWA_APP_THEME_COLOR = '#0d6efd'  # Azul Bootstrap
+PWA_APP_BACKGROUND_COLOR = '#ffffff'
+PWA_APP_DISPLAY = 'standalone'
+PWA_APP_SCOPE = '/'
+PWA_APP_ORIENTATION = 'portrait'
+PWA_APP_START_URL = '/'
+PWA_APP_STATUS_BAR_COLOR = 'default'
+PWA_APP_ICONS = [
+    {
+        'src': '/static/img/iconapp192.png',
+        'sizes': '192x192'
+    },
+    {
+        'src': '/static/img/iconapp512.png',
+        'sizes': '512x512'
+    }
+]
+PWA_APP_ICONS_APPLE = [
+    {
+        'src': '/static/img/iconapple192.png',
+        'sizes': '192x192'
+    },
+    {
+        'src': '/static/img/iconapple512.png',
+        'sizes': '512x512'
+    }
+]
+PWA_APP_SPLASH_SCREEN = [
+    {
+        'src': '/static/img/splash.png',
+        'media': '(device-width: 640px) and (device-height: 1136px)'
+    }
+]
+PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'static/js', 'serviceworker.js')

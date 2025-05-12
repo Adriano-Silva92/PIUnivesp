@@ -1,10 +1,14 @@
 {% load static %}
+{% load pwa %}
 <!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
+    {% progressive_web_app_meta %}
     <meta charset="UTF-8">
+    <meta name="description" content="Sistema de Compras - Controle de Pedidos e Aprovações">
     <title>Sistema de Compras</title>
+    <link rel="manifest" href="{% url 'manifest' %}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -12,6 +16,7 @@
 </head>
 
 <body class="light-theme">
+
     <div class="container-fluid my-4">
         <!-- TOPO -->
         <div class="container-fluid bg-light py-3 d-flex justify-content-between align-items-center border-bottom">
@@ -34,41 +39,56 @@
                 </form>
             </div>
         </div>
-        <!-- teste exportar CSV PDF -->
+        <!--  EXPORTAR CSV PDF -->
         <div class="text-right mb-3">
                <a href="{% url 'exportar_csv' %}" class="btn btn-outline-success">📄 Exportar CSV</a>
                <a href="{% url 'exportar_pdf' %}" class="btn btn-outline-danger">📄 Exportar PDF</a>
         </div>
-        <!-- fim teste CSV PDF -->
+        <!-- FIM CSV PDF -->
+
+        <!-- MENSAGEM PEDIDO CRIADO -->
+                {% if messages %}
+            <div class="alert alert-success alert-dismissible fade show text-center" role="alert" id="alert">
+                {% for message in messages %}
+                <strong>{{ message }}</strong>
+                {% endfor %}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+                 {% endif %}
+        <!-- FIM MENSAGEM -->
 
         <!-- TABELA -->
         <div class="container-fluid my-4">
             <h5>Exibindo a lista de pedidos:</h5>
-            <input type="text" class="form-control mb-2" id="filtro" placeholder="Filtrar por nome, data, setor...">
+            <input type="text" class="form-control mb-2" id="filtro" placeholder="Filtrar por nome, data, status...">
             <div class="table-responsive" style="max-height: 600px; overflow-y: scroll;">
                 <table class="table table-striped">
                     <thead class="thead-dark">
                         <tr>
-                            <th>Nome</th>
-                            <th>Setor</th>
-                            <th>Produto</th>
-                            <th>Quantidade</th>
-                            <th>Prioridade</th>
-                            <th>Status</th>
-                            <th>Data</th>
-                            {% if user.is_superuser %}<th>Ações</th>{% endif %}
+                            <th scope="col">Nome</th>
+                            <th scope="col">Solicitação</th>
+                            <th scope="col">Descrição</th>
+                            <th scope="col">Quantidade</th>
+                            <th scope="col">Prioridade</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Data</th>
+                            {% if user.is_superuser %}<th scope="col">Ações</th>{% endif %}
                         </tr>
                     </thead>
                     <tbody id="tabela-dados">
                         {% for pedido in pedidos %}
                         <tr>
                             <td>{{ pedido.usuario.first_name }}</td>
-                            <td>{{ pedido.setor }}</td>
+                            <td>{{ pedido.tipo }}</td>
                             <td>
                                 <a href="#"
                                    class="abrir-modal-pedido produto-link"
                                    data-id="{{ pedido.id }}"
-                                   data-produto="{{ pedido.produto }}">
+                                   data-produto="{{ pedido.produto }}"
+                                   data-foto="{{ pedido.foto_url }}">
+
                                    {{ pedido.produto|slice:":20" }}{% if pedido.produto|length > 20 %}...{% endif %}
                                 </a>
                             </td>
@@ -89,15 +109,29 @@
                             {% if user.is_superuser %}
                             <td>
                                 {% if pedido.status == "Pendente" %}
-                                <form method="post" action="{% url 'aprovar_pedido' pedido.id %}" style="display: inline-block;">
+                                <form method="post" action="{% url 'aprovar_pedido' pedido.id %}" style="display: inline-block;" class="form-aprovar">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-success">Aprovar</button>
+                                    <!-- <button type="submit" class="btn btn-sm btn-success">Aprovar</button> -->
+                                    <input type="image" src="{% static 'img/Aprovar3.png' %}" alt="Aprovar" width="24" height="24" title="Aprovar">
                                 </form>
-                                <form method="post" action="{% url 'negar_pedido' pedido.id %}" style="display: inline-block;">
+                                <form method="post" action="{% url 'negar_pedido' pedido.id %}" style="display: inline-block;" class="form-negar">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-danger">Negar</button>
+                                    <!-- <button type="submit" class="btn btn-sm btn-danger">Negar</button> -->
+                                    <input type="image" src="{% static 'img/Negar3.png' %}" alt="Negar" width="24" height="24" title="Negar">
+                                </form>
+                                <form method="post" action="{% url 'excluir_pedido' pedido.id %}" style="display: inline-block;" class="form-excluir">
+                                    {% csrf_token %}
+                                    <input type="image" src="{% static 'img/Excluir1.png' %}" alt="Excluir" width="24" height="24" title="Excluir">
                                 </form>
                                 {% endif %}
+                                {% if pedido.status == "Aprovado" or pedido.status == "Negado" %}
+                                  <form method="post" action="{% url 'excluir_pedido' pedido.id %}" style="display: inline-block;" class="form-excluir">
+                                     {% csrf_token %}
+                                      <input type="image" src="{% static 'img/Excluir1.png' %}" alt="Excluir" width="24" height="24" title="Excluir">
+                                  </form>
+                                      {% endif %}
+
+
                             </td>
                             {% endif %}
                         </tr>
@@ -105,14 +139,16 @@
                     </tbody>
                 </table>
             </div>
+            <!-- BOTÃO CRIAR PEDIDO -->
             <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#modalNovoPedido">
                 Novo Pedido
             </button>
+            <!-- FIM BOTÃO -->
 
-            <!-- Modal Novo Pedido -->
+            <!-- MODAL CRIAR PEDIDO -->
             <div class="modal fade" id="modalNovoPedido" tabindex="-1" role="dialog" aria-labelledby="modalNovoPedidoLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
-                    <form method="post" action="{% url 'criar_pedido' %}">
+                    <form method="post" action="{% url 'criar_pedido' %}" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="modal-content">
                             <div class="modal-header">
@@ -123,16 +159,19 @@
                             </div>
                             <div class="modal-body">
                                 <div class="form-group">
-                                    <label for="produto">Produto</label>
+                                    <label for="produto">Pedido</label>
                                     <input type="text" class="form-control" id="produto" name="produto" maxlength="100" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="quantidade">Quantidade</label>
-                                    <input type="number" class="form-control" id="quantidade" name="quantidade" required>
+                                    <input type="number" class="form-control" id="quantidade" name="quantidade" required min="1">
                                 </div>
                                 <div class="form-group">
-                                    <label for="setor">Setor</label>
-                                    <input type="text" class="form-control" id="setor" name="setor" required>
+                                    <label for="tipo">Tipo da Solicitação</label>
+                                    <select class="form-control" id="tipo" name="tipo" required>
+                                        <option value="Compra">Compra</option>
+                                        <option value="Suporte">Suporte</option>
+                                    </select>
                                 </div>
                                 <div class="form-group">
                                     <label for="prioridade">Grau de Prioridade</label>
@@ -141,6 +180,10 @@
                                         <option value="Média">Média</option>
                                         <option value="Alta">Alta</option>
                                     </select>
+                                </div>
+                                <div class="form-group">
+                                   <label for="foto">Foto do Produto (opcional)</label>
+                                   <input type="file" class="form-control-file" id="foto" name="foto" accept="image/*">
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -152,8 +195,9 @@
                 </div>
             </div>
         </div>
+        <!-- FIM MODAL CRIAR PEDIDO -->
 
-        <!-- Modal Detalhes do Pedido -->
+        <!-- MODAL DETALHAR PEDIDO -->
         <div class="modal fade" id="modalDetalhesPedido" tabindex="-1" role="dialog" aria-labelledby="detalhesPedidoLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                <div class="modal-content">
@@ -165,7 +209,11 @@
                    </div>
                    <div class="modal-body">
                        <p><strong>ID:</strong> <span id="detalhe-id"></span></p>
-                       <p><strong>Produto:</strong> <span id="detalhe-produto"></span></p>
+                       <p><strong>Pedido:</strong> <span id="detalhe-produto"></span></p>
+                       <p><strong>Imagem:</strong></p>
+                       <a id="link-foto" href=" " target="_blank" style="text-decoration: none;">
+                         <img id="detalhe-foto" src=" " alt="Foto do Produto" class="img-fluid rounded mb-3 d-block mx-auto" style="cursor: zoom-in;">
+                       </a>
                    </div>
                     <div class="modal-footer">
                          <button type="button" class="btn btn-primary" data-dismiss="modal">Fechar</button>
@@ -173,7 +221,7 @@
                </div>
             </div>
         </div>
-         <!-- Fim modal detalhes do Pedido -->
+         <!-- FIM MODAL DETALHAR PEDIDO -->
 
         <!-- MENSAGENS ESTILO CHAT -->
         <div class="container my-4">
@@ -202,6 +250,7 @@
                 {% endfor %}
             </div>
         </div>
+        <!-- FIM MENSAGENS CHAT -->
 
         <!-- GRÁFICO E FORMULÁRIO -->
         <div class="container d-flex justify-content-between mt-5">
@@ -218,8 +267,14 @@
                 </form>
             </div>
         </div>
+        <!-- FIM GRÁFICO E FORMULÁRIO -->
 
-        <!-- JS -->
+        <!-- SOM DE NOTIFICAÇÃO -->
+        <audio id="alert-sound" src="{% static 'sounds/notification.mp3' %}" preload="auto"></audio>
+        <audio id="sendSound" src="{% static 'sounds/notification2.mp3' %}" preload="auto"></audio>
+        <!-- FIM SOM -->
+
+        <!-- SCRIPT EXIBIÇÃO DO GRÁFICO -->
         <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
@@ -252,66 +307,71 @@
                 }
             });
         </script>
+        <!-- FIM DO SCRIPT EXIBIR GRÁFICO -->
 
-        <!-- teste de script alert status aprovado/negado
-         Após funcionamento, alterar para um arquivo js e colocar antes do /body
-         juntamente com os outros -->
-
+        <!-- SCRIPT VERIFICAÇÃO DE STATUS ALTERADO -->
         {% if novos_pedidos_aprovados_ou_negados %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        {% for pedido in novos_pedidos_aprovados_ou_negados %}
-            Swal.fire({
-                title: 'Pedido {{ pedido.status }}!',
-                text: "Seu pedido '{{ pedido.produto }}' foi {{ pedido.status }}.",
-                {% if pedido.status == "Aprovado" %}
-                icon: 'success',
-                {% else %}
-                icon: 'error',
-                {% endif %}
+        <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            const pedidos = [
+              {% for pedido in novos_pedidos_aprovados_ou_negados %}
+                {
+                  status: "{{ pedido.status }}",
+                  produto: "{{ pedido.produto }}",
+                  icon: "{% if pedido.status == 'Aprovado' %}success{% else %}error{% endif %}"
+                }{% if not forloop.last %},{% endif %}
+              {% endfor %}
+            ];
+
+            function exibirAlertaSequencial(index) {
+              if (index >= pedidos.length) return;
+
+              const pedido = pedidos[index];
+              Swal.fire({
+                title: `Pedido ${pedido.status}!`,
+                text: `Seu pedido '${pedido.produto}' foi ${pedido.status}.`,
+                icon: pedido.icon,
                 confirmButtonText: 'OK',
                 backdrop: true,
-                position: 'center',  // centraliza
-                didOpen: () => {
-                    const audio = new Audio("/static/sounds/notification.mp3");
-                    audio.play();
-                }
-            });
-        {% endfor %}
-    });
-</script>
-{% endif %}
+                position: 'center'
+              }).then(() => {
+                const audio = document.getElementById('alert-sound');
+                if (audio) audio.play();
+                exibirAlertaSequencial(index + 1);
+              });
+            }
 
-        <!-- fim teste -->
+            exibirAlertaSequencial(0);
+          });
+        </script>
+        {% endif %}
+        <!-- FIM SCRIPT STATUS ALTERADO-->
 
-<!-- Script abrir modal Detalhes -->
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const links = document.querySelectorAll('.abrir-modal-pedido');
-    links.forEach(link => {
-      link.addEventListener('click', function (e) {
-        e.preventDefault();
-        document.getElementById('detalhe-id').textContent = this.dataset.id;
-        document.getElementById('detalhe-produto').textContent = this.dataset.produto;
-        $('#modalDetalhesPedido').modal('show');
-      });
-    });
-  });
-</script>
-<!-- Fim script modal Detalher -->
+        <!-- SCRIPT PARA O PWA -->
+        <script>
+            if ('serviceWorker' in navigator) {
+               navigator.serviceWorker.register("{% url 'serviceworker' %}")
+               .then(function(registration) {
+                console.log("Service Worker registrado com sucesso:", registration);
+              }).catch(function(error) {
+                console.log("Erro ao registrar Service Worker:", error);
+              });
+            }
+        </script>
+        <!-- FIM SCRIPT PWA -->
 
-
-
+        <!-- JS -->
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+        <script src="{% static 'js/modal_detalhar_produto.js' %}"></script>
+        <script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script>
+        <script src="{% static 'js/alert_alterar_status.js' %}"></script>
         <script src="{% static 'js/sound_chat.js' %}"></script>
-         <script src="{% static 'js/mensagens_status_all.js' %}"></script>
         <script src="{% static 'js/mensagen_status.js' %}"></script>
-        <audio id="alert-sound" src="{% static 'sounds/notification.mp3' %}" preload="auto"></audio>
-        <audio id="sendSound" src="{% static 'sounds/notification2.mp3' %}" preload="auto"></audio>
         <script src="{% static 'js/filtro-tabela.js' %}"></script>
         <script src="{% static 'js/script.js' %}"></script>
         <script src="{% static 'js/usuarios_logados.js' %}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script src="{% static 'js/mensagem_pedido_criado.js' %}"></script>
     </div>
 </body>
 </html>

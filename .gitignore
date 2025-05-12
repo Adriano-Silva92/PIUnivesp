@@ -7,7 +7,6 @@ __pycache__/
 *.log
 *.pot
 *.pyc
-
 # Virtualenvs
 env/
 venv/
@@ -16,6 +15,7 @@ ENV/
 # VSCode / PyCharm
 .vscode/
 .idea/
+.env
 
 # Arquivos do sistema
 .DS_Store
@@ -27,7 +27,7 @@ Thumbs.db
 *.pyc
 
 # Arquivos de ambiente
-.env
+#.env
 
 # Pasta de arquivos estáticos e mídia gerados
 staticfiles/

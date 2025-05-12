@@ -27,3 +27,4 @@ dj_database_url==2.1.0
 python-dotenv~=1.1.0
 cloudinary==1.44.0
 django-cloudinary-storage==0.3.0
+django-pwa==2.0.1

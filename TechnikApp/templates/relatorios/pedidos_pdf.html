@@ -8,61 +8,7 @@
 
     <!-- Inclusão do Bootstrap via CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Inclusão do CSS personalizado -->
-    <!-- style>
-        body {
-            font-family: "Segoe UI", Arial, sans-serif;
-            font-size: 14px;
-            color: #212529;
-            margin: 40px;
-        }
 
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        table {
-            width: 95%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        th, td {
-            border: 1px solid #dee2e6;
-            padding: 10px;
-            vertical-align: middle;
-            background-color: #6c757d;
-
-        }
-
-        thead {
-            background-color: #6c757d;
-            color: black;
-        }
-
-        th {
-            font-weight: bold;
-            text-align: left;
-            background-color: #343a40;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 0.25em 0.6em;
-            font-size: 75%;
-            font-weight: 700;
-            color: #fff;
-            border-radius: 0.25rem;
-        }
-
-        .badge-success { background-color: #28a745; }
-        .badge-warning { background-color: #ffc107; color: #212529; }
-        .badge-danger  { background-color: #dc3545; }
-        .badge-secondary { background-color: #6c757d; }
-    </style-->
 </head>
 <body>
     <img src="https://www.grupotechnik.com.br/wp-content/uploads/2019/05/logo-grupo-technik-engenharia.png" alt="Logo da Empresa" style="width: 150px; height: auto; margin-bottom: 20px;">
@@ -74,9 +20,9 @@
                     <tr>
                         <th scope="col">ID</th>
                         <th scope="col">USUÁRIO</th>
-                        <th scope="col"> PRODUTO</th>
+                        <th scope="col">TIPO</th>
+                        <th scope="col">DESCRIÇÃO</th>
                         <th scope="col">QUANTIDADE</th>
-                        <th scope="col">SETOR</th>
                         <th scope="col">PRIORIDADE</th>
                         <th scope="col">STATUS</th>
                         <th scope="col">DATA</th>
@@ -87,9 +33,9 @@
                     <tr>
                         <td>#{{ pedido.id }}</td>
                         <td>{{ pedido.usuario.first_name }}</td>
+                        <td>{{ pedido.tipo }}</td>
                         <td>{{ pedido.produto }}</td>
                         <td>{{ pedido.quantidade }}</td>
-                        <td>{{ pedido.setor }}</td>
                         <td>{{ pedido.prioridade }}</td>
                         <td>
                             {% if pedido.status == "Aprovado" %}
