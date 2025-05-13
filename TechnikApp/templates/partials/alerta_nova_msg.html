@@ -1,0 +1,10 @@
+{% load static %}
+{% if ultima_mensagem %}
+<div class="alert alert-info alert-dismissible fade show text-center" role="alert" id="alert-msg-{{ ultima_mensagem.id }}">
+    <strong>Nova mensagem de {{ ultima_mensagem.usuario.get_full_name|default:ultima_mensagem.usuario.username }}:</strong> {{ ultima_mensagem.texto }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endif %}
+

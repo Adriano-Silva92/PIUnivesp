@@ -6,6 +6,7 @@ from .views import IndexView, apagar_mensagem, excluir_pedido
 from .views import criar_pedido, exportar_pedidos_csv
 from .views import usuarios_logados_partial, negar_pedido, aprovar_pedido
 from .views import checar_status_pedidos, exportar_pedidos_pdf
+from .views import verificar_novas_mensagens
 
 # Lista de URLs da aplicação
 urlpatterns = [
@@ -38,6 +39,8 @@ urlpatterns = [
 
     # Rota para exportar os pedidos em formato CSV.
     path('exportar/csv/', exportar_pedidos_csv, name='exportar_csv'),
+
+    path('verificar-novas-mensagens/', verificar_novas_mensagens, name='verificar_novas_mensagens'),
 
     # Inclui as rotas necessárias para transformar o projeto em um Progressive Web App (PWA).
     path('', include('pwa.urls')),

@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.db.models import Count
 from django.shortcuts import redirect, get_object_or_404, render
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.http import HttpResponseForbidden, JsonResponse
 from django.template.loader import render_to_string
 from weasyprint import HTML
@@ -102,6 +102,21 @@ def apagar_mensagem(request, mensagem_id): #Função para apagar mensagem
         return redirect('index')
     else: # Se não, ele recebe uma mensagem de erro
         return HttpResponseForbidden("Você não tem permissão para apagar esta mensagem.")
+
+@require_GET
+@login_required
+def verificar_novas_mensagens(request):
+    # Verifica as novas mensagens
+    vinte_segundos_atras = timezone.now() - timedelta(seconds=20)
+    novas_mensagens = Mensagem.objects.filter(data_criacao__gte=vinte_segundos_atras).exclude(usuario=request.user)
+
+    if novas_mensagens.exists():
+        ultima = novas_mensagens.last()
+        # Renderiza o template parcial com a nova mensagem
+        return render(request, "partials/alerta_nova_msg.html", {"ultima_mensagem": ultima})
+    else:
+        # Retorna um conteúdo vazio
+        return render(request, "partials/alerta_nova_msg.html", {"ultima_mensagem": None})
 
 #CRIAR PEDIDO COM E-MAIL
 @require_POST
